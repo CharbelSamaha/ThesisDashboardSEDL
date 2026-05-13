@@ -1,0 +1,1029 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capstone Pathway Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8f7f4; --surface: #ffffff;
+    --border: rgba(0,0,0,0.1); --border-md: rgba(0,0,0,0.18);
+    --text: #1a1a18; --text-muted: #5f5e5a; --text-hint: #888780;
+    --purple-50: #EEEDFE; --purple-200: #AFA9EC; --purple-600: #534AB7; --purple-800: #3C3489;
+    --teal-50: #E1F5EE; --teal-200: #5DCAA5; --teal-600: #0F6E56; --teal-800: #085041;
+    --amber-50: #FAEEDA; --amber-200: #EF9F27; --amber-600: #854F0B; --amber-800: #633806;
+    --coral-50: #FAECE7; --coral-200: #F0997B; --coral-600: #993C1D; --coral-800: #712B13;
+    --blue-50: #E6F1FB; --blue-200: #85B7EB; --blue-600: #185FA5; --blue-800: #0C447C;
+    --green-50: #EAF3DE; --green-200: #97C459; --green-600: #3B6D11; --green-800: #27500A;
+    --gray-50: #F1EFE8; --gray-200: #B4B2A9; --gray-600: #5F5E5A;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+  .page-outer { max-width: 1320px; margin: 0 auto; padding: 2rem 1.5rem; display: flex; gap: 1.5rem; align-items: flex-start; }
+  .main-col { flex: 1; min-width: 0; }
+  .sidebar-col { width: 210px; min-width: 210px; position: sticky; top: 1.5rem; display: flex; flex-direction: column; gap: 10px; }
+  .sidebar-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; }
+  .sidebar-group-title { font-size: 10px; font-weight: 500; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .sidebar-link { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--blue-600); text-decoration: none; padding: 4px 0; border-bottom: 0.5px solid var(--border); line-height: 1.4; }
+  .sidebar-link:last-child { border-bottom: none; padding-bottom: 0; }
+  .sidebar-link:hover { color: var(--blue-800); }
+  .sidebar-link-icon { font-size: 11px; margin-top: 2px; flex-shrink: 0; color: var(--text-hint); }
+  .sidebar-nav { background: var(--purple-50); border: 0.5px solid var(--purple-200); border-radius: var(--radius-lg); padding: 12px 14px; }
+  .sidebar-nav a { display: block; font-size: 12px; color: var(--purple-600); text-decoration: none; padding: 3px 0; }
+  .sidebar-nav a:hover { color: var(--purple-800); }
+
+  header { margin-bottom: 2rem; }
+  header h1 { font-size: 22px; font-weight: 500; }
+  header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+  .section-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 1rem; margin-top: 2rem; }
+
+  .meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+  .metric .label { font-size: 12px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .metric .value { font-size: 22px; font-weight: 500; }
+  .metric .sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .overall-bar-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 2rem; }
+  .overall-bar-wrap h2 { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 10px; }
+  .bar-track { background: var(--gray-50); border-radius: 99px; height: 14px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; background: var(--coral-600); transition: width 0.6s ease; }
+
+  .timeline { display: flex; gap: 0; margin-bottom: 2rem; overflow-x: auto; }
+  .phase { flex: 1; min-width: 110px; padding: 10px 12px; font-size: 12px; font-weight: 500; text-align: center; border-top: 3px solid transparent; }
+  .phase:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .phase:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+  .phase .phase-label { font-weight: 500; font-size: 12px; }
+  .phase .phase-range { font-size: 11px; margin-top: 2px; }
+  .ph-setup   { background: var(--purple-50); border-top-color: var(--purple-600); color: var(--purple-800); }
+  .ph-draft   { background: var(--amber-50);  border-top-color: var(--amber-600);  color: var(--amber-800); }
+  .ph-revise  { background: var(--coral-50);  border-top-color: var(--coral-600);  color: var(--coral-800); }
+
+  .quarters-col { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
+  .q-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .q-card-header { padding: 14px 16px 12px; border-bottom: 0.5px solid var(--border); }
+  .q-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .q-top h3 { font-size: 15px; font-weight: 500; }
+  .q-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .badge-setup  { background: var(--purple-50); color: var(--purple-800); }
+  .badge-draft  { background: var(--amber-50);  color: var(--amber-800); }
+  .badge-revise { background: var(--coral-50);  color: var(--coral-800); }
+  .q-prog-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .q-prog-track { flex: 1; background: var(--gray-50); height: 6px; border-radius: 99px; overflow: hidden; }
+  .q-prog-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .fill-setup  { background: var(--purple-600); }
+  .fill-draft  { background: var(--amber-600); }
+  .fill-revise { background: var(--coral-600); }
+  .q-pct { font-size: 12px; font-weight: 500; color: var(--text-muted); min-width: 32px; text-align: right; }
+
+  .q-dates-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .q-date-field { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 130px; }
+  .q-date-label { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .q-date-input { font-size: 12px; border: 0.5px solid var(--border-md); border-radius: var(--radius); padding: 4px 7px; background: var(--surface); color: var(--text); outline: none; width: 100%; }
+  .q-date-input:focus { border-color: var(--purple-600); }
+  .q-date-input.auto-filled { border-color: var(--teal-200); background: var(--teal-50); color: var(--teal-800); }
+  .q-date-tag { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
+  .q-date-tag.confirmed { color: var(--teal-600); }
+
+  .q-card-body { padding: 0 16px 16px; }
+  .cat-block { margin-top: 14px; }
+  .cat-header { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 0; border-bottom: 0.5px solid var(--border); user-select: none; }
+  .cat-toggle { font-size: 11px; color: var(--text-hint); transition: transform 0.2s; display: inline-block; width: 14px; }
+  .cat-toggle.open { transform: rotate(90deg); }
+  .cat-name { font-size: 13px; font-weight: 500; flex: 1; color: var(--text); }
+  .cat-progress { font-size: 11px; color: var(--text-hint); background: var(--gray-50); border-radius: 99px; padding: 1px 7px; }
+  .cat-progress.complete { background: var(--teal-50); color: var(--teal-600); }
+  .cat-items { list-style: none; padding-left: 18px; }
+  .cat-items.hidden { display: none; }
+  .task-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; cursor: pointer; }
+  .task-item:last-child { border-bottom: none; }
+  .t-check { width: 15px; height: 15px; min-width: 15px; border-radius: 3px; border: 1.5px solid var(--border-md); background: var(--surface); margin-top: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .t-check.done { background: var(--coral-600); border-color: var(--coral-600); }
+  .t-check.done::after { content: ''; display: block; width: 8px; height: 4px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+  .t-text { line-height: 1.4; color: var(--text); }
+  .t-text.done { text-decoration: line-through; color: var(--text-hint); }
+
+  .tpo-nested { margin-top: 10px; background: var(--coral-50); border: 0.5px solid var(--coral-200); border-radius: var(--radius); padding: 10px 14px; }
+  .tpo-nested-title { font-size: 12px; font-weight: 500; color: var(--coral-800); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tpo-deadline { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 0.5px solid var(--coral-200); font-size: 12px; }
+  .tpo-deadline:last-child { border-bottom: none; }
+  .tpo-dl-label { color: var(--coral-800); font-weight: 500; }
+  .tpo-dl-date { color: var(--coral-600); }
+  .tpo-dl-days { font-size: 11px; color: var(--text-hint); margin-left: 8px; }
+
+  .cohort-card { background: var(--purple-50); border: 0.5px solid var(--purple-200); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .cohort-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-top: 10px; }
+  .cohort-note { font-size: 12px; color: var(--purple-600); margin-top: 10px; }
+  .gen-field { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+  .gen-label { font-size: 11px; font-weight: 500; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .gen-field select { font-size: 13px; border: 0.5px solid var(--border-md); border-radius: var(--radius); padding: 6px 10px; background: var(--surface); color: var(--text); outline: none; }
+
+  .gen-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 2rem; }
+  .gen-card h2 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .gen-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+  .gen-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .gen-btn { padding: 7px 20px; border-radius: var(--radius); border: none; background: var(--coral-600); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .gen-btn:hover { background: var(--coral-800); }
+  .gen-output { margin-top: 1.5rem; }
+  .gen-result-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
+  .gen-result-title { font-size: 14px; font-weight: 500; color: var(--text); display: block; }
+  .gen-result-sub { font-size: 12px; color: var(--text-hint); display: block; margin-top: 3px; }
+  .gen-export-btn { padding: 6px 14px; border-radius: var(--radius); border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer; font-weight: 500; }
+  .tl-list { display: flex; flex-direction: column; }
+  .tl-item { display: flex; gap: 14px; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; width: 20px; min-width: 20px; }
+  .tl-dot { width: 14px; height: 14px; min-height: 14px; border-radius: 50%; margin-top: 15px; flex-shrink: 0; }
+  .tl-line { flex: 1; width: 2px; background: var(--border); min-height: 16px; }
+  .tl-content { flex: 1; border: 0.5px solid; border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }
+  .tl-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .tl-name { font-size: 13px; font-weight: 500; }
+  .tl-rel { font-size: 11px; color: var(--text-hint); background: var(--surface); border-radius: 99px; padding: 2px 8px; border: 0.5px solid var(--border); white-space: nowrap; }
+  .tl-rel.past { opacity: 0.5; }
+  .tl-date { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+  .tl-note { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-style: italic; line-height: 1.5; }
+
+  .q-courses { margin-top: 14px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+  .q-courses-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .q-courses-title { font-size: 11px; font-weight: 500; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .python-tip { font-size: 11px; background: var(--blue-50); color: var(--blue-800); border-radius: 4px; padding: 3px 8px; border: 0.5px solid var(--border); }
+  .course-item { border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+  .course-item-header { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--gray-50); }
+  .course-confirmed { width: 14px; height: 14px; min-width: 14px; border-radius: 3px; border: 1.5px solid var(--border-md); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .course-confirmed.yes { background: var(--teal-600); border-color: var(--teal-600); }
+  .course-confirmed.yes::after { content: ''; display: block; width: 8px; height: 4px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+  .course-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+  .course-confirmed-label { font-size: 11px; color: var(--text-hint); }
+  .course-confirmed-label.confirmed { color: var(--teal-600); }
+  .btn-remove { background: none; border: none; cursor: pointer; color: var(--text-hint); font-size: 16px; line-height: 1; padding: 0 2px; }
+  .btn-remove:hover { color: var(--coral-600); }
+  .assignments-list { list-style: none; padding: 4px 10px 6px; }
+  .assignment-item { display: flex; align-items: flex-start; gap: 7px; padding: 3px 0; font-size: 12px; cursor: pointer; border-bottom: 0.5px solid var(--border); }
+  .assignment-item:last-child { border-bottom: none; }
+  .a-check { width: 13px; height: 13px; min-width: 13px; border-radius: 2px; border: 1.5px solid var(--border-md); background: var(--surface); margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+  .a-check.done { background: var(--coral-600); border-color: var(--coral-600); }
+  .a-check.done::after { content: ''; display: block; width: 7px; height: 4px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
+  .a-text { flex: 1; line-height: 1.4; color: var(--text); }
+  .a-text.done { text-decoration: line-through; color: var(--text-hint); }
+  .a-remove { background: none; border: none; cursor: pointer; color: var(--text-hint); font-size: 13px; padding: 0; margin-left: 2px; }
+  .add-assignment-row { display: flex; gap: 6px; padding: 4px 10px 8px; }
+  .add-assignment-row input { flex: 1; font-size: 12px; border: 0.5px solid var(--border-md); border-radius: 4px; padding: 4px 8px; background: var(--surface); color: var(--text); outline: none; }
+  .add-assignment-row button { font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 0.5px solid var(--coral-600); background: var(--coral-50); color: var(--coral-800); cursor: pointer; font-weight: 500; }
+  .add-course-row { display: flex; gap: 6px; margin-top: 8px; }
+  .add-course-row input { flex: 1; font-size: 13px; border: 0.5px solid var(--border-md); border-radius: 4px; padding: 5px 10px; background: var(--surface); color: var(--text); outline: none; }
+  .add-course-row button { font-size: 12px; padding: 5px 12px; border-radius: 4px; border: 0.5px solid var(--coral-600); background: var(--coral-600); color: #fff; cursor: pointer; font-weight: 500; }
+  .no-courses-hint { font-size: 12px; color: var(--text-hint); font-style: italic; padding: 4px 0; }
+
+  .save-bar { position: sticky; bottom: 1rem; display: flex; justify-content: center; gap: 12px; pointer-events: none; }
+  .save-bar button { pointer-events: all; padding: 10px 20px; border-radius: var(--radius); border: 0.5px solid var(--border-md); background: var(--surface); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .save-bar .btn-primary { background: var(--coral-600); color: #fff; border-color: var(--coral-600); }
+  .save-bar .btn-primary:hover { background: var(--coral-800); }
+  .save-notice { position: fixed; bottom: 5rem; right: 1.5rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 14px; font-size: 13px; color: var(--text-muted); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .save-notice.show { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .page-outer { flex-direction: column; }
+    .sidebar-col { width: 100%; min-width: 0; position: static; flex-direction: row; flex-wrap: wrap; }
+    .sidebar-card { flex: 1; min-width: 180px; }
+  }
+
+  /* ── Share Progress Modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 1.75rem; width: 100%; max-width: 520px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); position: relative; }
+  .modal-box h2 { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+  .modal-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5; }
+  .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-hint); line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-field { margin-bottom: 12px; }
+  .modal-field label { font-size: 11px; font-weight: 500; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 4px; }
+  .modal-field input { width: 100%; font-size: 13px; border: 0.5px solid var(--border-md); border-radius: var(--radius); padding: 7px 10px; background: var(--surface); color: var(--text); outline: none; }
+  .modal-field input:focus { border-color: var(--coral-600); }
+  .modal-field input.error { border-color: var(--coral-600); background: var(--coral-50); }
+  .modal-snapshot { background: var(--gray-50); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; }
+  .modal-snapshot-title { font-size: 11px; font-weight: 500; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .snap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; font-size: 12px; }
+  .snap-row:last-child { margin-bottom: 0; }
+  .snap-label { width: 80px; min-width: 80px; color: var(--text-muted); font-weight: 500; }
+  .snap-bar { flex: 1; background: var(--surface); height: 6px; border-radius: 99px; overflow: hidden; border: 0.5px solid var(--border); }
+  .snap-fill { height: 100%; border-radius: 99px; }
+  .snap-pct { width: 32px; text-align: right; color: var(--text-hint); }
+  .modal-tip { font-size: 12px; color: var(--amber-800); background: var(--amber-50); border: 0.5px solid var(--amber-200); border-radius: var(--radius); padding: 8px 12px; margin-bottom: 14px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .modal-btn { flex: 1; min-width: 130px; padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; border: none; }
+  .btn-save-pdf { background: var(--surface); color: var(--text); border: 0.5px solid var(--border-md); }
+  .btn-save-pdf:hover { background: var(--gray-50); }
+  .btn-open-email { background: var(--coral-600); color: #fff; }
+  .btn-open-email:hover { background: var(--coral-800); }
+  .share-fab { position: fixed; bottom: 1rem; left: 1.5rem; padding: 10px 18px; border-radius: var(--radius); border: none; background: var(--blue-600); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 100; }
+  .share-fab:hover { background: var(--blue-800); }
+  @media print { .modal-overlay, .share-fab, .save-bar { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="page-outer">
+<div class="main-col">
+
+  <header>
+    <h1>Capstone Pathway</h1>
+    <p>3-quarter capstone tracker (Q6 · Q7 · Q8) &nbsp;·&nbsp; Final submission: Friday, December 18, 2026</p>
+  </header>
+
+  <div class="meta-row">
+    <div class="metric">
+      <div class="label">Overall progress</div>
+      <div class="value" id="overall-pct">0%</div>
+      <div class="sub">of all tasks complete</div>
+    </div>
+    <div class="metric">
+      <div class="label">Tasks complete</div>
+      <div class="value" id="done-count">0</div>
+      <div class="sub" id="total-count">of 0 total</div>
+    </div>
+    <div class="metric">
+      <div class="label">Days to submission</div>
+      <div class="value" id="days-left">—</div>
+      <div class="sub">until Dec 18, 2026</div>
+    </div>
+    <div class="metric">
+      <div class="label">Final deadline</div>
+      <div class="value" style="font-size:15px">Dec 18, 2026</div>
+      <div class="sub">Thesis final draft deadline</div>
+    </div>
+  </div>
+
+  <div class="overall-bar-wrap">
+    <h2>Overall completion</h2>
+    <div class="bar-track"><div class="bar-fill" id="main-bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="section-title">Capstone phases</div>
+  <div class="timeline">
+    <div class="phase ph-setup"><div class="phase-label">Setup &amp; proposal</div><div class="phase-range">Q6</div></div>
+    <div class="phase ph-draft"><div class="phase-label">Drafting &amp; research</div><div class="phase-range">Q7</div></div>
+    <div class="phase ph-revise"><div class="phase-label">Revisions &amp; TPO</div><div class="phase-range">Q8</div></div>
+  </div>
+
+  <div class="section-title">Quarter milestones</div>
+
+  <div class="cohort-card">
+    <div style="font-size:13px; font-weight:500; color:var(--purple-800);">When did you start your capstone quarter?</div>
+    <div style="font-size:12px; color:var(--purple-600); margin-top:3px;">Select your starting AY and quarter — dates will auto-fill from the NPS academic calendar.</div>
+    <div class="cohort-row">
+      <div class="gen-field">
+        <label class="gen-label" style="color:var(--purple-800);">Starting academic year</label>
+        <select id="cohort-ay" onchange="updateCohortDates()">
+          <option value="">— Select AY —</option>
+          <option value="2026">AY 2026</option>
+          <option value="2027">AY 2027</option>
+          <option value="2028">AY 2028</option>
+          <option value="2029">AY 2029</option>
+        </select>
+      </div>
+      <div class="gen-field">
+        <label class="gen-label" style="color:var(--purple-800);">Starting quarter (Q6)</label>
+        <select id="cohort-q" onchange="updateCohortDates()">
+          <option value="">— Select quarter —</option>
+          <option value="Q1">Q1 — Fall</option>
+          <option value="Q2">Q2 — Winter</option>
+          <option value="Q3">Q3 — Spring</option>
+          <option value="Q4">Q4 — Summer</option>
+        </select>
+      </div>
+    </div>
+    <div class="cohort-note">AY 2026 and AY 2027 dates confirmed. Other years are estimated — verify in Python and with the Registrar.</div>
+  </div>
+
+  <div class="quarters-col" id="quarters-col"></div>
+
+  <div class="section-title">My thesis timeline generator</div>
+  <div class="gen-card">
+    <p class="gen-desc">Select your graduation AY and quarter to generate a personalized TPO milestone timeline. All dates calculated from the official NPS academic calendar.</p>
+    <div class="gen-controls">
+      <div class="gen-field">
+        <label class="gen-label">Graduation academic year</label>
+        <select id="gen-ay">
+          <option value="2026" selected>AY 2026</option>
+          <option value="2027">AY 2027</option>
+          <option value="2028">AY 2028</option>
+        </select>
+      </div>
+      <div class="gen-field">
+        <label class="gen-label">Graduation quarter</label>
+        <select id="gen-quarter">
+          <option value="Q1">Q1 — Dec graduation</option>
+          <option value="Q2">Q2 — Mar graduation</option>
+          <option value="Q3" selected>Q3 — Jun graduation</option>
+          <option value="Q4">Q4 — Sep graduation</option>
+        </select>
+      </div>
+      <div class="gen-field">
+        <label class="gen-label">Pacing preference</label>
+        <select id="gen-pacing">
+          <option value="standard" selected>Standard</option>
+          <option value="aggressive">Aggressive</option>
+          <option value="flexible">Flexible (with buffer)</option>
+        </select>
+      </div>
+      <button class="gen-btn" onclick="generateTimeline()">Generate my timeline</button>
+    </div>
+    <div id="gen-output"></div>
+  </div>
+
+</div>
+
+<aside class="sidebar-col">
+  <div class="sidebar-nav">
+    <div class="sidebar-group-title">Navigation</div>
+    <a href="index.html">← Thesis pathway (8 quarters)</a>
+    <a href="capstone.html" style="color:var(--coral-600); font-weight:500;">Capstone pathway (3 quarters)</a>
+  </div>
+
+  <div class="sidebar-card">
+    <div class="sidebar-group-title">Writing center</div>
+    <a class="sidebar-link" href="https://nps.edu/web/gwc/home" target="_blank"><span class="sidebar-link-icon">↗</span>GWC home page</a>
+    <a class="sidebar-link" href="https://nps.edu/web/gwc" target="_blank"><span class="sidebar-link-icon">↗</span>GWC learning &amp; writing resources</a>
+    <a class="sidebar-link" href="https://nps.edu/web/gwc/thesis-proposals-common-elements" target="_blank"><span class="sidebar-link-icon">↗</span>GWC thesis proposal common elements</a>
+  </div>
+
+  <div class="sidebar-card">
+    <div class="sidebar-group-title">Thesis processing</div>
+    <a class="sidebar-link" href="https://nps.edu/web/thesisprocessing/home" target="_blank"><span class="sidebar-link-icon">↗</span>TPO home page</a>
+    <a class="sidebar-link" href="https://nps.edu/web/thesisprocessing/future-quarters" target="_blank"><span class="sidebar-link-icon">↗</span>TPO future graduation deadlines</a>
+  </div>
+
+  <div class="sidebar-card">
+    <div class="sidebar-group-title">Academic resources</div>
+    <a class="sidebar-link" href="https://python.nps.edu/" target="_blank"><span class="sidebar-link-icon">↗</span>Python (student info system)</a>
+    <a class="sidebar-link" href="https://online.nps.edu/" target="_blank"><span class="sidebar-link-icon">↗</span>NPS Online</a>
+    <a class="sidebar-link" href="https://nps.edu/web/registrar" target="_blank"><span class="sidebar-link-icon">↗</span>Registrar office</a>
+    <a class="sidebar-link" href="https://library.nps.edu/" target="_blank"><span class="sidebar-link-icon">↗</span>Dudley Knox Library</a>
+    <a class="sidebar-link" href="https://libguides.nps.edu/citation" target="_blank"><span class="sidebar-link-icon">↗</span>DKL citation guides</a>
+    <a class="sidebar-link" href="https://nps.edu/web/technology" target="_blank"><span class="sidebar-link-icon">↗</span>ITACS (technology support)</a>
+  </div>
+</aside>
+</div>
+
+<div class="save-bar">
+  <button onclick="downloadFile()">Download updated file</button>
+  <button class="btn-primary" onclick="saveData()">Save progress</button>
+</div>
+<div class="save-notice" id="save-notice">Progress saved</div>
+
+<script>
+const NPS_CALENDAR = [
+  { ay:2026, q:'Q1', season:'Fall',   start:'2025-09-29', end:'2025-12-19', confirmed:true  },
+  { ay:2026, q:'Q2', season:'Winter', start:'2026-01-05', end:'2026-03-27', confirmed:true  },
+  { ay:2026, q:'Q3', season:'Spring', start:'2026-03-30', end:'2026-06-18', confirmed:true  },
+  { ay:2026, q:'Q4', season:'Summer', start:'2026-07-06', end:'2026-09-25', confirmed:true  },
+  { ay:2027, q:'Q1', season:'Fall',   start:'2026-09-28', end:'2026-12-18', confirmed:true  },
+  { ay:2027, q:'Q2', season:'Winter', start:'2027-01-04', end:'2027-03-26', confirmed:true  },
+  { ay:2027, q:'Q3', season:'Spring', start:'2027-03-29', end:'2027-06-17', confirmed:true  },
+  { ay:2027, q:'Q4', season:'Summer', start:'2027-07-06', end:'2027-09-24', confirmed:true  },
+  { ay:2028, q:'Q1', season:'Fall',   start:'2027-09-29', end:'2027-12-17', confirmed:false },
+  { ay:2028, q:'Q2', season:'Winter', start:'2028-01-03', end:'2028-03-25', confirmed:false },
+  { ay:2028, q:'Q3', season:'Spring', start:'2028-03-28', end:'2028-06-18', confirmed:false },
+  { ay:2028, q:'Q4', season:'Summer', start:'2028-07-06', end:'2028-09-24', confirmed:false },
+];
+
+const QUARTERS = [
+  {
+    id: 'q6', label: 'Quarter 6', progLabel: 'Q6', phase: 'setup', phaseName: 'Setup & proposal',
+    focus: 'Establish your team, secure advisors, submit your proposal, and lay the research groundwork.',
+    categories: [
+      { id: 'c6-1', name: 'Orientation & resources', tasks: [
+        'Attend Foundations',
+        'Visit the GWC\'s Learning Tools Page',
+        'Bookmark the GWC Writing Resource page and explore learning options',
+        'Verify course enrollment in Python'
+      ]},
+      { id: 'c6-2', name: 'GWC workshops & writing support', tasks: [
+        'Attend GWC workshops (recommended: Zotero, Gen AI for Research, Library QuickStart, Strategic Reading)',
+        'Attend GWC workshops (recommended: What Every Paper Needs, Strategic Writing II, Thesis Prep Part I, Mastering the Literature Review, Thesis Prep Part II, Paraphrasing and Citing Right)',
+        'Start meeting with GWC Instructors to brainstorm research topics and questions',
+        'Have a GWC coach work with you using the SE thesis proposal checklist',
+        'Attend 1 Thesis/Capstone Writing Block'
+      ]},
+      { id: 'c6-3', name: 'Advising & research support', tasks: [
+        'Find and secure advisors (tip: your program officer can help)',
+        'Identify and agree on roles and responsibilities for each team member',
+        'Meet with advisor on a weekly/biweekly basis',
+        'Meet with Library Liaison Jenna Hillhouse for help with Zotero and gathering sources',
+        'Once proposal is in Python, have advisors approve it'
+      ]},
+      { id: 'c6-4', name: 'Proposal development', tasks: [
+        'Complete a messy first draft of your proposal (include research problem statement, research question, and hypothesis)',
+        'Use SE thesis proposal checklist to revise your proposal',
+        'Share your draft with your advisors'
+      ]},
+      { id: 'c6-5', name: 'Python dashboard', tasks: [
+        'Update your thesis dashboard on Python',
+        'Fill out the IRB section of your Python dashboard',
+        'Enter proposal into Python and have advisors approve it'
+      ]},
+      { id: 'c6-6', name: 'Stretch goals', tasks: [
+        'Create a detailed outline for each chapter of your capstone',
+        'Complete two full rough drafts for any 2 chapters'
+      ]}
+    ]
+  },
+  {
+    id: 'q7', label: 'Quarter 7', progLabel: 'Q7', phase: 'draft', phaseName: 'Drafting & research',
+    focus: 'Complete your modeling/experiments, draft core chapters, and keep advisors and stakeholders updated.',
+    categories: [
+      { id: 'c7-1', name: 'Admin & resources', tasks: [
+        'Verify course enrollment in Python',
+        'Visit the GWC\'s Learning Tools Page'
+      ]},
+      { id: 'c7-2', name: 'GWC workshops & writing support', tasks: [
+        'Attend GWC workshops (recommended: Mastering the Literature Review, Thesis Prep Part II, Thesis Prep Part III)',
+        'Attend 1 or more Thesis/Capstone Writing Blocks',
+        'Continue meeting with GWC Instructors as needed (book sessions early — GWC can set up recurring appointments)',
+        'Ask a GWC coach to run drafts through iThenticate (one chapter at a time, not all at once)'
+      ]},
+      { id: 'c7-3', name: 'Advising & research support', tasks: [
+        'Continue meeting with advisors on a weekly/biweekly basis',
+        'Meet with stakeholders regularly and provide progress notes and updates',
+        'Integrate feedback from your advisors'
+      ]},
+      { id: 'c7-4', name: 'Research, drafting & revising', tasks: [
+        'Determine how much of your modeling/experiment needs to be done',
+        'Begin rough drafts of your methods, findings, and analysis chapters',
+        'Revise the contents of your first few chapters',
+        'Update drafting and revising schedule to accommodate changes'
+      ]},
+      { id: 'c7-5', name: 'Python dashboard', tasks: [
+        'Update your thesis dashboard on Python'
+      ]},
+      { id: 'c7-6', name: 'Stretch goals', tasks: [
+        'Consider moving your content into the thesis template',
+        'Start filling out sections of your conclusion'
+      ]}
+    ]
+  },
+  {
+    id: 'q8', label: 'Quarter 8', progLabel: 'Q8', phase: 'revise', phaseName: 'Revisions & TPO',
+    focus: 'Finalize all chapters, meet TPO deadlines, and submit your thesis by December 18, 2026.',
+    tpoDeadlines: [
+      { label: 'Thesis initial draft due date',     date: '2026-10-30' },
+      { label: 'Thesis initial draft hard deadline', date: '2026-12-04' },
+      { label: 'Thesis final draft due date',        date: '2026-12-04' },
+      { label: 'Thesis final draft hard deadline',   date: '2026-12-18' }
+    ],
+    categories: [
+      { id: 'c8-1', name: 'Admin & resources', tasks: [
+        'Verify course enrollment in Python',
+        'Visit the GWC\'s Learning Tools Page'
+      ]},
+      { id: 'c8-2', name: 'GWC workshops & writing support', tasks: [
+        'Attend GWC workshops as needed',
+        'Attend 1 or more Thesis/Capstone Writing Blocks',
+        'Continue meeting with GWC Instructors as needed',
+        'Ask a GWC coach to run drafts through iThenticate for an unofficial report (one chapter at a time)'
+      ]},
+      { id: 'c8-3', name: 'Advising & research support', tasks: [
+        'Continue meeting with advisors on a weekly/biweekly basis',
+        'Meet with stakeholders regularly and provide progress notes and updates',
+        'Determine remaining modeling/experiment work and share progress with advisors',
+        'Revise previously drafted chapters and incorporate professor feedback'
+      ]},
+      { id: 'c8-4', name: 'Research, drafting & revising', tasks: [
+        'Draft and revise the conclusion chapter',
+        'Ask a GWC coach to run drafts through iThenticate (one chapter at a time)',
+        'Check citations to ensure they are formatted properly',
+        'Make final adjustments to all chapters'
+      ]},
+      { id: 'c8-5', name: 'Python dashboard & TPO goals', tasks: [
+        'Watch TPO brief early — do not wait for Python to update',
+        'Once you have watched the brief, enter the code from your Ed Tech into Python'
+      ]}
+    ]
+  }
+];
+
+const PHASE_FILL  = { setup: 'fill-setup',  draft: 'fill-draft',  revise: 'fill-revise' };
+const PHASE_BADGE = { setup: 'badge-setup', draft: 'badge-draft', revise: 'badge-revise' };
+
+let state = {};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('capstone_dashboard_v1');
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {}
+  QUARTERS.forEach(q => {
+    if (!state[q.id]) state[q.id] = { tasks: {}, courses: [], collapsed: {} };
+    if (!state[q.id].courses) state[q.id].courses = [];
+    if (!state[q.id].collapsed) state[q.id].collapsed = {};
+  });
+}
+
+function saveData() {
+  localStorage.setItem('capstone_dashboard_v1', JSON.stringify(state));
+  const el = document.getElementById('save-notice');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function toggleTask(qId, catId, taskIdx) {
+  if (!state[qId]) state[qId] = { tasks: {}, courses: [] };
+  if (!state[qId].tasks[catId]) state[qId].tasks[catId] = [];
+  const arr = state[qId].tasks[catId];
+  arr[taskIdx] = !arr[taskIdx];
+  saveData();
+  renderAll();
+}
+
+function toggleCat(qId, catId) {
+  if (!state[qId].collapsed) state[qId].collapsed = {};
+  state[qId].collapsed[catId] = !state[qId].collapsed[catId];
+  saveData();
+  renderAll();
+}
+
+function countAll() {
+  let total = 0, done = 0;
+  QUARTERS.forEach(q => {
+    q.categories.forEach(cat => {
+      total += cat.tasks.length;
+      const checks = state[q.id]?.tasks[cat.id] || [];
+      done += checks.filter(Boolean).length;
+    });
+  });
+  return { total, done };
+}
+
+function updateMetrics() {
+  const { total, done } = countAll();
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('main-bar').style.width = pct + '%';
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('total-count').textContent = 'of ' + total + ' tasks';
+  const today = new Date();
+  const final = new Date('2026-12-18T12:00:00');
+  document.getElementById('days-left').textContent = Math.max(0, Math.ceil((final - today) / 86400000)).toLocaleString();
+}
+
+function fmtDisplayDate(isoStr) {
+  if (!isoStr) return '';
+  const [y, m, d] = isoStr.split('-');
+  return new Date(parseInt(y), parseInt(m)-1, parseInt(d)).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function daysAwayStr(isoStr) {
+  const target = new Date(isoStr + 'T12:00:00');
+  const days = Math.ceil((target - new Date()) / 86400000);
+  return days < 0 ? 'passed' : days === 0 ? 'today' : days + ' days away';
+}
+
+function getCohortStartIndex() {
+  const ay = document.getElementById('cohort-ay')?.value;
+  const q  = document.getElementById('cohort-q')?.value;
+  if (!ay || !q) return state.cohortStartIndex ?? null;
+  return NPS_CALENDAR.findIndex(c => String(c.ay) === ay && c.q === q);
+}
+
+function updateCohortDates() {
+  const idx = getCohortStartIndex();
+  if (idx === null || idx < 0) return;
+  state.cohortStartIndex = idx;
+  QUARTERS.forEach((q, qIdx) => {
+    const calIdx = idx + qIdx;
+    if (calIdx < NPS_CALENDAR.length) {
+      const entry = NPS_CALENDAR[calIdx];
+      if (!state[q.id]) state[q.id] = { tasks: {}, courses: [] };
+      state[q.id].startDate = entry.start;
+      state[q.id].endDate   = entry.end;
+    }
+  });
+  saveData();
+  renderAll();
+}
+
+function saveQuarterDate(qId, field, value) {
+  if (!state[qId]) state[qId] = { tasks: {}, courses: [] };
+  if (field === 'start') state[qId].startDate = value;
+  if (field === 'end')   state[qId].endDate   = value;
+  saveData();
+}
+
+function buildCoursesSection(qId) {
+  if (!state[qId]) state[qId] = { tasks: {}, courses: [] };
+  const courses = state[qId].courses || [];
+  const coursesHtml = courses.length === 0
+    ? '<div class="no-courses-hint">No courses added yet.</div>'
+    : courses.map((c, ci) => {
+        const assignsHtml = c.assignments?.length
+          ? '<ul class="assignments-list">' + c.assignments.map((a, ai) =>
+              `<li class="assignment-item" onclick="toggleAssign('${qId}',${ci},${ai})">
+                <div class="a-check ${a.done?'done':''}"></div>
+                <span class="a-text ${a.done?'done':''}">${a.text}</span>
+                <button class="a-remove" onclick="removeAssign('${qId}',${ci},${ai},event)">×</button>
+              </li>`).join('') + '</ul>' : '';
+        return `<div class="course-item">
+          <div class="course-item-header">
+            <div class="course-confirmed ${c.confirmed?'yes':''}" onclick="toggleCourseConf('${qId}',${ci})"></div>
+            <span class="course-name">${c.name}</span>
+            <span class="course-confirmed-label ${c.confirmed?'confirmed':''}">${c.confirmed?'Confirmed in Python':'Confirm in Python'}</span>
+            <button class="btn-remove" onclick="removeCourse('${qId}',${ci})">×</button>
+          </div>
+          ${assignsHtml}
+          <div class="add-assignment-row">
+            <input id="ai-${qId}-${ci}" type="text" placeholder="Add assignment or milestone…" onkeydown="if(event.key==='Enter')addAssign('${qId}',${ci})">
+            <button onclick="addAssign('${qId}',${ci})">Add</button>
+          </div>
+        </div>`;
+      }).join('');
+  return `<div class="q-courses">
+    <div class="q-courses-header">
+      <span class="q-courses-title">My courses this quarter</span>
+      <span class="python-tip">Verify enrollment in Python</span>
+    </div>
+    ${coursesHtml}
+    <div class="add-course-row">
+      <input id="ci-${qId}" type="text" placeholder="Add a course (e.g. SE 4900)…" onkeydown="if(event.key==='Enter')addCourse('${qId}')">
+      <button onclick="addCourse('${qId}')">Add course</button>
+    </div>
+  </div>`;
+}
+
+function addCourse(qId) {
+  const el = document.getElementById('ci-' + qId);
+  const name = el.value.trim(); if (!name) return;
+  state[qId].courses.push({ name, confirmed: false, assignments: [] });
+  el.value = ''; saveData(); renderAll();
+}
+function removeCourse(qId, ci) { state[qId].courses.splice(ci,1); saveData(); renderAll(); }
+function toggleCourseConf(qId, ci) { state[qId].courses[ci].confirmed = !state[qId].courses[ci].confirmed; saveData(); renderAll(); }
+function addAssign(qId, ci) {
+  const el = document.getElementById('ai-'+qId+'-'+ci);
+  const text = el.value.trim(); if (!text) return;
+  state[qId].courses[ci].assignments.push({ text, done: false });
+  el.value = ''; saveData(); renderAll();
+}
+function toggleAssign(qId, ci, ai) { state[qId].courses[ci].assignments[ai].done = !state[qId].courses[ci].assignments[ai].done; saveData(); renderAll(); }
+function removeAssign(qId, ci, ai, e) { e.stopPropagation(); state[qId].courses[ci].assignments.splice(ai,1); saveData(); renderAll(); }
+
+function renderAll() {
+  const col = document.getElementById('quarters-col');
+  col.innerHTML = '';
+
+  QUARTERS.forEach((q, qIdx) => {
+    const qState = state[q.id] || {};
+    let totalTasks = 0, doneTasks = 0;
+    q.categories.forEach(cat => {
+      totalTasks += cat.tasks.length;
+      const checks = qState.tasks?.[cat.id] || [];
+      doneTasks += checks.filter(Boolean).length;
+    });
+    const pct = totalTasks ? Math.round(doneTasks / totalTasks * 100) : 0;
+
+    const calEntry = (() => {
+      const idx = state.cohortStartIndex;
+      if (idx === null || idx === undefined) return null;
+      const ci = idx + qIdx;
+      return ci < NPS_CALENDAR.length ? NPS_CALENDAR[ci] : null;
+    })();
+    const startVal = qState.startDate || '';
+    const endVal   = qState.endDate   || '';
+    const isAuto   = !!calEntry;
+    const tagText  = !calEntry ? 'Optional — enter manually or select cohort above'
+                   : calEntry.confirmed ? 'Confirmed NPS calendar' : 'Estimated — verify in Python';
+    const tagClass = calEntry?.confirmed ? 'q-date-tag confirmed' : 'q-date-tag';
+
+    const catsHtml = q.categories.map(cat => {
+      const checks   = qState.tasks?.[cat.id] || [];
+      const catDone  = checks.filter(Boolean).length;
+      const catTotal = cat.tasks.length;
+      const collapsed = qState.collapsed?.[cat.id];
+      const progText = catDone + '/' + catTotal + ' complete';
+      const progComplete = catDone === catTotal && catTotal > 0;
+
+      const tasksHtml = cat.tasks.map((t, ti) => {
+        const checked = checks[ti] || false;
+        return `<li class="task-item" onclick="toggleTask('${q.id}','${cat.id}',${ti})">
+          <div class="t-check ${checked?'done':''}"></div>
+          <span class="t-text ${checked?'done':''}">${t}</span>
+        </li>`;
+      }).join('');
+
+      return `<div class="cat-block">
+        <div class="cat-header" onclick="toggleCat('${q.id}','${cat.id}')">
+          <span class="cat-toggle ${collapsed?'':'open'}">▶</span>
+          <span class="cat-name">${cat.name}</span>
+          <span class="cat-progress ${progComplete?'complete':''}">${progText}</span>
+        </div>
+        <ul class="cat-items ${collapsed?'hidden':''}">
+          ${tasksHtml}
+        </ul>
+      </div>`;
+    }).join('');
+
+    const tpoHtml = q.tpoDeadlines ? `<div class="tpo-nested">
+      <div class="tpo-nested-title">TPO deadlines — nested within Q8</div>
+      ${q.tpoDeadlines.map(d => `
+        <div class="tpo-deadline">
+          <span class="tpo-dl-label">${d.label}</span>
+          <span>
+            <span class="tpo-dl-date">${fmtDisplayDate(d.date)}</span>
+            <span class="tpo-dl-days">${daysAwayStr(d.date)}</span>
+          </span>
+        </div>`).join('')}
+    </div>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.innerHTML = `
+      <div class="q-card-header">
+        <div class="q-top">
+          <h3>${q.label} <span style="color:var(--text-hint);font-size:12px;font-weight:400;">(Program ${q.progLabel})</span></h3>
+          <span class="q-badge ${PHASE_BADGE[q.phase]}">${q.phaseName}</span>
+        </div>
+        <div class="q-prog-row">
+          <div class="q-prog-track"><div class="q-prog-fill ${PHASE_FILL[q.phase]}" style="width:${pct}%"></div></div>
+          <span class="q-pct">${pct}%</span>
+        </div>
+        <div class="q-dates-row" style="margin-top:10px;">
+          <div class="q-date-field">
+            <span class="q-date-label">Quarter start date</span>
+            <input type="date" class="q-date-input ${startVal&&isAuto?'auto-filled':''}" value="${startVal}"
+              onchange="saveQuarterDate('${q.id}','start',this.value)">
+            <span class="${tagClass}">${tagText}</span>
+          </div>
+          <div class="q-date-field">
+            <span class="q-date-label">Quarter end / graduation date</span>
+            <input type="date" class="q-date-input ${endVal&&isAuto?'auto-filled':''}" value="${endVal}"
+              onchange="saveQuarterDate('${q.id}','end',this.value)">
+            <span class="${tagClass}">${tagText}</span>
+          </div>
+        </div>
+      </div>
+      <div class="q-card-body">
+        <div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:10px 0 4px;">${q.focus}</div>
+        ${catsHtml}
+        ${tpoHtml}
+        ${buildCoursesSection(q.id)}
+      </div>`;
+    col.appendChild(card);
+  });
+
+  updateMetrics();
+}
+
+const NPS_CAL_MAP = Object.fromEntries(
+  NPS_CALENDAR.map(c => [c.ay+'_'+c.q, c])
+);
+
+function getQuarterEndDate(ay, quarter) {
+  const entry = NPS_CALENDAR.find(c => String(c.ay)===String(ay) && c.q===quarter);
+  if (entry) return new Date(entry.end + 'T12:00:00');
+  const y = parseInt(ay);
+  if (quarter==='Q1') return new Date(y-1,11,18);
+  if (quarter==='Q2') return new Date(y,2,26);
+  if (quarter==='Q3') return new Date(y,5,17);
+  if (quarter==='Q4') return new Date(y,8,24);
+}
+
+function shiftDays(date, days) {
+  const d = new Date(date); d.setDate(d.getDate()+days); return d;
+}
+
+function fmtDate(date) {
+  return date.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+const PACING = {
+  aggressive: { finalDraft:10, traf:1, initialDraft:28, tpoBrief:42, proposal:56, advisors:28 },
+  standard:   { finalDraft:12, traf:2, initialDraft:35, tpoBrief:49, proposal:63, advisors:35 },
+  flexible:   { finalDraft:14, traf:3, initialDraft:42, tpoBrief:56, proposal:70, advisors:42 }
+};
+
+const TL_COLORS = {
+  purple:{ bg:'var(--purple-50)', dot:'var(--purple-600)', text:'var(--purple-800)', border:'var(--purple-200)' },
+  teal:  { bg:'var(--teal-50)',   dot:'var(--teal-600)',   text:'var(--teal-800)',   border:'var(--teal-200)'   },
+  blue:  { bg:'var(--blue-50)',   dot:'var(--blue-600)',   text:'var(--blue-800)',   border:'var(--blue-200)'   },
+  amber: { bg:'var(--amber-50)',  dot:'var(--amber-200)',  text:'var(--amber-800)',  border:'var(--amber-200)'  },
+  coral: { bg:'var(--coral-50)',  dot:'var(--coral-600)',  text:'var(--coral-800)',  border:'var(--coral-200)'  },
+  green: { bg:'var(--green-50)',  dot:'var(--green-600)',  text:'var(--green-800)',  border:'var(--green-200)'  }
+};
+
+function generateTimeline() {
+  const ay=document.getElementById('gen-ay').value;
+  const quarter=document.getElementById('gen-quarter').value;
+  const pacing=document.getElementById('gen-pacing').value;
+  const p=PACING[pacing];
+  const acceptance=getQuarterEndDate(ay,quarter);
+  const finalDraft=shiftDays(acceptance,-p.finalDraft);
+  const traf=shiftDays(finalDraft,-p.traf);
+  const initialDraft=shiftDays(finalDraft,-p.initialDraft);
+  const tpoBrief=shiftDays(initialDraft,-p.tpoBrief);
+  const proposal=shiftDays(initialDraft,-p.proposal);
+  const advisors=shiftDays(proposal,-p.advisors);
+  const milestones=[
+    {name:'Advisors selected',          date:advisors,     color:'purple', note:'Confirm committee and set regular meeting cadence with your advisor.'},
+    {name:'Proposal approved (TPF)',     date:proposal,     color:'teal',   note:'Proposal submitted, reviewed, and approved in Python by your advisors.'},
+    {name:'TPO brief',                   date:tpoBrief,     color:'blue',   note:'Attend TPO brief early — do not wait for Python to update.'},
+    {name:'Initial draft submitted',     date:initialDraft, color:'amber',  note:'Submit initial thesis draft to advisors and GWC for review.'},
+    {name:'Department approval (TRAF)',  date:traf,         color:'coral',  note:'Thesis approved by department chair before final submission.'},
+    {name:'Final draft to TPO',          date:finalDraft,   color:'green',  note:'Submit final, fully approved draft to the Thesis Processing Office.'},
+    {name:'Thesis acceptance',           date:acceptance,   color:'purple', note:'Target graduation quarter end — thesis fully accepted and on record.'}
+  ];
+  const today=new Date();
+  const qLabel={Q1:'Q1 (Dec)',Q2:'Q2 (Mar)',Q3:'Q3 (Jun)',Q4:'Q4 (Sep)'}[quarter];
+  const pacingLabel={standard:'Standard',aggressive:'Aggressive',flexible:'Flexible'}[pacing];
+  const itemsHtml=milestones.map((m,i)=>{
+    const c=TL_COLORS[m.color];
+    const isLast=i===milestones.length-1;
+    const isPast=m.date<today;
+    const daysAway=Math.ceil((m.date-today)/86400000);
+    const relLabel=isPast?'passed':daysAway===0?'today':daysAway+' days away';
+    return `<div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot" style="background:${c.dot}"></div>
+        ${!isLast?'<div class="tl-line"></div>':''}
+      </div>
+      <div class="tl-content" style="background:${c.bg};border-color:${c.border}">
+        <div class="tl-row">
+          <span class="tl-name" style="color:${c.text}">${m.name}</span>
+          <span class="tl-rel ${isPast?'past':''}">${relLabel}</span>
+        </div>
+        <div class="tl-date">${fmtDate(m.date)}</div>
+        <div class="tl-note">${m.note}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('gen-output').innerHTML=`
+    <div class="gen-result-header">
+      <div>
+        <span class="gen-result-title">AY ${ay} &nbsp;·&nbsp; ${qLabel} &nbsp;·&nbsp; ${pacingLabel} pacing</span>
+        <span class="gen-result-sub">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} &nbsp;·&nbsp; Verify all deadlines in Python</span>
+      </div>
+      <button class="gen-export-btn" onclick="window.print()">Export / print</button>
+    </div>
+    <div class="tl-list">${itemsHtml}</div>`;
+}
+
+function downloadFile() {
+  saveData();
+  const src = document.documentElement.outerHTML;
+  const blob = new Blob([src], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'capstone.html';
+  a.click();
+}
+
+loadState();
+
+if (state.cohortStartIndex !== null && state.cohortStartIndex !== undefined) {
+  const entry = NPS_CALENDAR[state.cohortStartIndex];
+  if (entry) {
+    const ayEl = document.getElementById('cohort-ay');
+    const qEl  = document.getElementById('cohort-q');
+    if (ayEl) ayEl.value = String(entry.ay);
+    if (qEl)  qEl.value  = entry.q;
+  }
+}
+
+renderAll();
+</script>
+<!-- ── Share Progress Modal ── -->
+<div class="modal-overlay hidden" id="share-modal" onclick="if(event.target===this)closeShareModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeShareModal()">×</button>
+    <h2>✉️ Share progress report</h2>
+    <p>Enter your advisor's email below. A pre-filled Outlook draft will open with your full progress summary. Save your dashboard as a PDF first, then attach it to the email before sending.</p>
+
+    <div class="modal-field">
+      <label>Recipient email address *</label>
+      <input type="email" id="sp-email" placeholder="advisor@nps.edu" onkeydown="if(event.key==='Enter')openShareEmail()">
+    </div>
+    <div class="modal-field">
+      <label>Your name (optional)</label>
+      <input type="text" id="sp-name" placeholder="e.g. Jane Smith">
+    </div>
+    <div class="modal-field">
+      <label>Personal note (optional)</label>
+      <input type="text" id="sp-note" placeholder="e.g. Here is my Q7 progress update.">
+    </div>
+
+    <div class="modal-snapshot">
+      <div class="modal-snapshot-title">Progress snapshot — included in email</div>
+      <div id="sp-snapshot"></div>
+    </div>
+
+    <div class="modal-tip">
+      💡 <strong>To attach your dashboard:</strong> Click "Save as PDF" — your browser's print dialog will open. Choose "Save as PDF" as the destination. Then attach that file to the email draft before hitting send.
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn btn-save-pdf" onclick="saveAsPdf()">📄 Save as PDF</button>
+      <button class="modal-btn btn-open-email" onclick="openShareEmail()">✉️ Open email draft in Outlook</button>
+    </div>
+  </div>
+</div>
+
+<button class="share-fab" onclick="openShareModal()">✉️ Share progress</button>
+
+<script>
+// ── Share Progress Feature ───────────────────────────────────
+
+const QUARTER_COLORS = {
+  cq6: '#534AB7',
+  cq7: '#854F0B',
+  cq8: '#993C1D'
+};
+
+function getProgressData() {
+  return QUARTERS.map(q => {
+    let done = 0, total = 0;
+    q.categories.forEach(cat => {
+      total += cat.tasks.length;
+      const checks = state[q.id]?.tasks?.[cat.id] || [];
+      done += checks.filter(Boolean).length;
+    });
+    const pct = total ? Math.round(done / total * 100) : 0;
+    return { id: q.id, label: q.label, progLabel: q.progLabel, phaseName: q.phaseName, done, total, pct };
+  });
+}
+
+function openShareModal() {
+  saveData();
+  const progress = getProgressData();
+  const snapshotHtml = progress.map(q => `
+    <div class="snap-row">
+      <span class="snap-label">${q.label}</span>
+      <div class="snap-bar"><div class="snap-fill" style="width:${q.pct}%;background:${QUARTER_COLORS[q.id]}"></div></div>
+      <span class="snap-pct">${q.pct}%</span>
+    </div>`).join('');
+  document.getElementById('sp-snapshot').innerHTML = snapshotHtml;
+  document.getElementById('share-modal').classList.remove('hidden');
+  document.getElementById('sp-email').focus();
+}
+
+function closeShareModal() {
+  document.getElementById('share-modal').classList.add('hidden');
+}
+
+function openShareEmail() {
+  const emailEl = document.getElementById('sp-email');
+  const to = emailEl.value.trim();
+  if (!to) {
+    emailEl.classList.add('error');
+    emailEl.focus();
+    return;
+  }
+  emailEl.classList.remove('error');
+
+  const name = document.getElementById('sp-name').value.trim();
+  const note = document.getElementById('sp-note').value.trim();
+  const progress = getProgressData();
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  let totalDone = 0, totalAll = 0;
+  progress.forEach(q => { totalDone += q.done; totalAll += q.total; });
+  const overallPct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
+
+  const subject = `NPS Capstone Progress Update — ${today}`;
+
+  let body = '';
+  if (name) body += `From: ${name}\n`;
+  body += `Date: ${today}\n\n`;
+  if (note) body += `${note}\n\n`;
+  body += `Hello,\n\nI am sharing my NPS Capstone Pathway progress report for your review.\n`;
+  body += `Overall completion: ${totalDone} of ${totalAll} tasks complete (${overallPct}%)\n\n`;
+  body += `---- PROGRESS BY QUARTER ----\n\n`;
+
+  progress.forEach(q => {
+    body += `${q.label} — ${q.phaseName}\n`;
+    body += `  ${q.done}/${q.total} tasks complete (${q.pct}%)\n`;
+
+    const qState = state[q.id];
+    const qDef = QUARTERS.find(x => x.id === q.id);
+    if (qDef && qState) {
+      qDef.categories.forEach(cat => {
+        const checks = qState.tasks?.[cat.id] || [];
+        body += `\n  [${cat.name}]\n`;
+        cat.tasks.forEach((task, i) => {
+          body += `    ${checks[i] ? '✓' : '○'} ${task}\n`;
+        });
+      });
+    }
+    body += '\n';
+  });
+
+  body += `---- END OF REPORT ----\n\n`;
+  body += `📎 Please see the attached PDF for a visual summary.\n`;
+  body += `This report was generated from the NPS Capstone Pathway Dashboard.`;
+
+  const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+function saveAsPdf() {
+  window.print();
+}
+</script>
+</body>
+</html>
